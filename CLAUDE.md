@@ -21,7 +21,9 @@ Follow this every session, in order.
    `scripts/verify.sh` (once it exists).
 3. On a new machine or a clean tree, set the commit identity and run `pre-commit install` (see
    "Public repository"), then run `scripts/bootstrap.sh`.
-4. If `verify.sh` fails on a tree `PROGRESS.md` says is green, fixing that is the first task.
+4. If `verify.sh` fails on a tree `PROGRESS.md` says is green, fixing that is the first task. The same
+   applies if the latest CI run for `dev` failed. Check it with the public, unauthenticated API:
+   `https://api.github.com/repos/johnwason/robotraconteur_lua/actions/runs?branch=dev&per_page=1`.
 5. Take the first task in `PROGRESS.md` that is not done, not blocked, and has its prerequisites met.
 
 ### During
@@ -69,6 +71,8 @@ Not allowed without a human:
 - `sudo` or installing system packages on the host. System packages belong in the `Containerfile`. If
   the host lacks podman, record it as a blocker.
 - Adding a dependency not named in this file (record a proposal in `PROGRESS.md` instead).
+- Weakening CI: adding secrets, write permissions, self-hosted runners, or triggers beyond those in
+  M0.6, or running Claude or any other agent from GitHub Actions.
 - Anything under a "Human gate" below.
 
 If RR core itself needs a change, do not make it. Write the proposal, with the rationale and a patch,
@@ -313,7 +317,8 @@ MATLAB can do. Use its execution model, not its feature set.
 ## Planned layout
 
 ```
-CLAUDE.md  PROGRESS.md  CMakeLists.txt  Containerfile  .pre-commit-config.yaml
+CLAUDE.md  PROGRESS.md  CMakeLists.txt  Containerfile  .pre-commit-config.yaml  LICENSE
+.github/workflows/ci.yml
 scripts/bootstrap.sh  scripts/verify.sh  scripts/verify-sanitizers.sh
 lua_eigen/        numerics library, no RR dependency
 rr_lua_core/      host-neutral C++ binding (static library)
@@ -330,7 +335,8 @@ docs/             user docs, docs/upstream-proposals/
 Prerequisites run top to bottom unless noted. Add detail to `PROGRESS.md` as needed.
 
 ### M0: Bootstrap
-- **M0.1** `.gitignore`, CMake skeleton, license (default Apache-2.0, matching RR, unless a human says otherwise).
+- **M0.1** Add `LICENSE` first, because the repository is public and has none (default Apache-2.0,
+  matching RR, unless a human says otherwise). Then `.gitignore` and the CMake skeleton.
 - **M0.2** `Containerfile` and `scripts/bootstrap.sh`: idempotent; builds the podman image, then inside
   the container fetches and builds pinned Lua 5.4 (built as C, the usual host configuration) and LuaJIT
   into `.deps/`, builds RR `v1.2.9` core and its test server into `.deps/`, and creates the Python venv.
@@ -343,8 +349,18 @@ Prerequisites run top to bottom unless noted. Add detail to `PROGRESS.md` as nee
   and a repeated teardown stress test. TSan is unreliable unless RR core is instrumented too. This is
   slow, so it is not part of `verify.sh`. Run it at the end of M2 through M5, and when touching the
   error guard, dispatch queue or teardown code.
-- **Accept:** on a clean clone, `bootstrap.sh && verify.sh` passes, and the container reports the host
-  architecture.
+- **M0.6** `.github/workflows/ci.yml`. CI only checks the work; no agent runs in Actions.
+  - Triggers: `push` to `dev` and `main`, `workflow_dispatch`, and a weekly `schedule` for sanitizers.
+    Never `pull_request_target` or issue and comment events. Schedules only run from the repository's
+    default branch, so the workflow must exist there.
+  - GitHub-hosted `ubuntu-24.04` runners only. `permissions: contents: read`. No repository secrets.
+  - Pin every third-party action to a full commit SHA, and set `timeout-minutes` on every job.
+  - Jobs: (1) secret scan of full history (`fetch-depth: 0`) with
+    `ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f`;
+    (2) `scripts/bootstrap.sh` then `scripts/verify.sh`, caching `.deps/` keyed on the pinned dependency
+    versions; (3) `scripts/verify-sanitizers.sh`, on schedule and manual dispatch only.
+- **Accept:** on a clean clone, `bootstrap.sh && verify.sh` passes, the container reports the host
+  architecture, and CI is green on `dev`.
 
 ### M1: Numerics (`lua_eigen`)
 - **M1.1** Matrix userdata: construct, table conversion, element access, rows/cols, operators, printing.

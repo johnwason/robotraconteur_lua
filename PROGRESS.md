@@ -14,6 +14,7 @@ machine, knows where things stand. Confirm what it says against `git log` and `s
 | M0.3 `verify.sh` | not started | |
 | M0.4 Trivial module, error guard | not started | |
 | M0.5 Sanitizer builds and teardown stress | not started | |
+| M0.6 GitHub Actions CI | not started | |
 | M1.1 Matrix userdata | not started | |
 | M1.2 Linear algebra | not started | |
 | M1.3 Spatial | not started | |
@@ -58,6 +59,8 @@ Record the date, the evidence, and what changed.
   to true varargs functions.
 - 2026-11-08: Added a `pre-commit` hook running gitleaks because the repository is public. It runs on
   the host as approved local tooling, as an exception to the container rule.
+- 2026-11-08: The project owner chose CI only on GitHub Actions; no agent runs there. Added M0.6 and
+  made `LICENSE` the first task.
 
 ## Measurements
 
