@@ -56,6 +56,8 @@ Record the date, the evidence, and what changed.
 - 2026-11-08: RR data now passes through SWIG as raw stack references (`rl::Arg`, `rl::Ret`), following
   the Python binding's raw `PyObject*` approach at the project owner's direction. `%native` is limited
   to true varargs functions.
+- 2026-11-08: Added a `pre-commit` hook running gitleaks because the repository is public. It runs on
+  the host as approved local tooling, as an exception to the container rule.
 
 ## Measurements
 
