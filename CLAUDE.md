@@ -16,7 +16,8 @@ Follow this every session, in order.
 
 ### Start
 1. `git fetch`, check out `dev`, and `git pull --ff-only`. If that fails because histories diverged,
-   stop and record it in your final message. Never force-push or rewrite history.
+   stop and record it in your final message. Never rewrite history. Local commits that are not on
+   `origin/dev` yet are expected: they are waiting for the human to push.
 2. Read `PROGRESS.md`. Trust it only as far as you can confirm it: check `git log` and run
    `scripts/verify.sh` (once it exists).
 3. On a new machine or a clean tree, set the commit identity and run `pre-commit install` (see
@@ -27,19 +28,22 @@ Follow this every session, in order.
 5. Take the first task in `PROGRESS.md` that is not done, not blocked, and has its prerequisites met.
 
 ### During
-- Work on one task at a time. Make small commits. A machine may vanish at any moment, and uncommitted
+- Work on one task at a time. Make small commits. A session may end at any moment, and uncommitted
   work is lost when it does.
-- Commit and push to `dev` after each completed task, and at least every 30–60 minutes of work.
+- **Never push.** Commit to the local `dev` branch only. The human reviews and pushes. Do not set up
+  git credentials or credential helpers.
+- Commit to `dev` after each completed task, and at least every 30–60 minutes of work.
 - A commit that does not pass `verify.sh` must have a subject starting with `wip:`. The next session
   finishes it or reverts it.
 - Before stopping work mid-task, write what you tried and what comes next under "In progress" in
-  `PROGRESS.md`, then commit and push.
+  `PROGRESS.md`, then commit.
 
 ### Finish
 1. Run `scripts/verify.sh`.
 2. Update `PROGRESS.md`: task status, "In progress", "Next", blockers, and one session log entry
    stating what was verified and how.
-3. Commit and push to `dev`.
+3. Commit to `dev`. Do not push. In your final message, say how many commits `dev` is ahead of
+   `origin/dev`.
 
 ### Done means verified
 A task is done only when its acceptance criteria pass and its tests are in `verify.sh`. Report results
@@ -55,7 +59,7 @@ independent task. If nothing independent remains, stop and say so. Do not loop o
 
 Allowed: anything inside this repository, downloading the pinned dependencies and reference
 repositories listed here into `.deps/`, reading `~/RobotRaconteur` when present (see "Other reference
-implementations"), and pushing to this repo's `dev` branch.
+implementations"), and committing to the local `dev` branch.
 
 **Downloaded or third-party code is only built and run inside the project's podman container**, never
 directly on the host. Mount only the repository. Pass an explicit `--platform` matching the host and
@@ -65,7 +69,7 @@ is local developer tooling for git hooks (`pre-commit` and the pinned gitleaks h
 host.
 
 Not allowed without a human:
-- Pushing to `main`, or force-pushing anything.
+- Pushing anything, to any branch. Only the human pushes.
 - Opening issues or PRs, or pushing to any other repository, including upstream Robot Raconteur and
   Tesseract and any fork of them.
 - Modifying any checkout outside this repository. Upstream sources are read-only references.
@@ -448,7 +452,7 @@ Prerequisites run top to bottom unless noted. Add detail to `PROGRESS.md` as nee
     (2) `scripts/bootstrap.sh` then `scripts/verify.sh`, caching `.deps/` keyed on the pinned dependency
     versions; (3) `scripts/verify-sanitizers.sh`, on schedule and manual dispatch only.
 - **Accept:** on a clean clone, `bootstrap.sh && verify.sh` passes, the container reports the host
-  architecture, and CI is green on `dev`.
+  architecture, and CI is green on `dev` once the human has pushed.
 
 ### M1: Numerics (`lua_eigen`)
 - **M1.1** Matrix userdata: construct, table conversion, element access, rows/cols, operators, printing.
@@ -533,4 +537,6 @@ claude -p "Continue this project. Follow the session protocol in CLAUDE.md."
 ```
 
 Unattended runs need tool permissions configured. Run them in a container or under a dedicated account.
-Only run one session at a time per repository. Review `PROGRESS.md` and merge `dev` to `main` yourself.
+Only run one session at a time per repository. Sessions commit locally and never push: review the new
+commits and `PROGRESS.md`, then push `dev` yourself. Push before continuing on another machine, because
+a session there only sees what is on GitHub. Merge `dev` to `main` yourself.

@@ -48,6 +48,9 @@ None.
 
 Record the date, the evidence, and what changed.
 
+- 2026-11-11: Sessions no longer push. At the project owner's direction, they commit to the local
+  `dev` branch to track work, and the owner reviews and pushes. The session protocol, the boundaries,
+  and the M0 acceptance wording for CI were updated to match.
 - 2026-11-11: The RR core pin moved from tag `v1.2.9` to `master` commit
   `7cd1610c519613f241b25453754fb118b270cdaf` at the project owner's direction, to use the shared test vector blob
   (#489: `test/data/test_vectors.bin`). The C++ test server and RR's own service tests now take their
