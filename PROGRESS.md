@@ -42,12 +42,26 @@ None.
 
 ## Blocked / needs a human
 
-None yet.
+None.
 
 ## Decisions and plan changes
 
 Record the date, the evidence, and what changed.
 
+- 2026-11-11: The RR core pin moved from tag `v1.2.9` to `master` commit
+  `7cd1610c519613f241b25453754fb118b270cdaf` at the project owner's direction, to use the shared test vector blob
+  (#489: `test/data/test_vectors.bin`). The C++ test server and RR's own service tests now take their
+  expected values from it, as do the Racket client's ServiceTest ports, so the M2 acceptance tests read
+  it too. The other two commits after the tag change service definition parsing (keeping documentation
+  when sending definitions) and node directories; `RobotRaconteurMex.cpp` is unchanged, so its line
+  references still hold. The Python peer stays at release 1.2.9.
+- 2026-11-11: The project owner asked that sessions also consider
+  `johnwason/robotraconteur_typescript`, `johnwason/robotraconteur_typescript_node`,
+  `johnwason/robotraconteur_racket`, and local `~/RobotRaconteur` checkouts when present. Added "Other
+  reference implementations" to `CLAUDE.md` with pinned commits, what to use each for, and read-only
+  rules; `bootstrap.sh` (M0.2) now clones them into `.deps/refs/`; M5 acceptance now includes reviewing
+  their test cases. They are references only; Python stays the test peer. Local checkouts may be under
+  `~/RobotRaconteur2` instead; both names are checked.
 - 2026-11-08: D8 changed from one node per process to multiple independent nodes. The project owner
   confirmed the single node is only a MATLAB convenience. The core supports it directly (constructor
   plus `Init()`), and RR's own C++ tests run several nodes per process.
@@ -99,9 +113,13 @@ Out of scope for now. Do not act on these without a plan change.
 
 - Transparent `__index` proxy written in pure Lua on top of the explicit API.
 - LuaJIT FFI paths for very fast array access.
+- Use the TypeScript (Node.js) service and the Racket client as extra interoperability peers in CI.
 
 ## Session log
 
 Newest first. Each entry: date, machine-independent summary, what was verified and how.
 
+- 2026-11-11: Plan updated to add the TypeScript, TypeScript Node and Racket implementations and local
+  `~/RobotRaconteur` checkouts as references. Pinned commits are the heads of each repository's default
+  branch on that date. Documentation only; nothing built or run.
 - 2026-11-08: Plan created from a feasibility discussion. No code written, nothing run.
